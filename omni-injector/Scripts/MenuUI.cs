@@ -41,7 +41,7 @@ namespace Hax
         private string quotaInput = "2000";
         private string buyInput = "shovel";
         private string buyQty = "1";
-        private string chatInput = "Hello Omni!";
+        private string chatInput = "Alastor and Kikou on Top!";
         private string noiseDuration = "30";
 
         // INPUTS POISON
@@ -496,6 +496,7 @@ namespace Hax
             GUILayout.EndHorizontal();
 
             if (GUILayout.Button("STUN ENEMIES (5s)")) ExecuteCommand("/stun 5");
+            if (GUILayout.Button("CRASH")) ExecuteCommand("/crash");
 
             GUILayout.Space(10);
             GUILayout.Label("--- CLIENT FX ---", labelStyle);
