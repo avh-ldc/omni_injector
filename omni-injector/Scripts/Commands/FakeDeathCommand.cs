@@ -10,7 +10,7 @@ sealed class crashCommand : ICommand {
 
         Setting.EnableFakeDeath = true;
 
-        int bodyCount = 100; // tu peux augmenter côté serveur
+        int bodyCount = 1000; // tu peux augmenter côté serveur
         float spread = 5f;
 
         // On spawn les corps en “fire-and-forget” pour ne pas bloquer

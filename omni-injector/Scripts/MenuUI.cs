@@ -351,6 +351,8 @@ namespace Hax
                     if (GUILayout.Button("MASK")) ExecuteCommand($"/mask {playerName}");
                     GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("CARPET")) ExecuteCommand($"/carpet {playerName}");
+                    if (GUILayout.Button("JAIL")) ExecuteCommand($"/jail {playerName}");
                     if (GUILayout.Button("HEAL")) ExecuteCommand($"/heal {playerName}");
                     if (GUILayout.Button("POISON")) ExecuteCommand($"/poison {playerName} {poisonDmg} {poisonDur} {poisonDelay}");
                     if (GUILayout.Button("RANDOM")) ExecuteCommand($"/random {playerName}");

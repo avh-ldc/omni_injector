@@ -1,14 +1,7 @@
 using System.Collections;
 using UnityEngine;
-using System.Linq;
 
 sealed class AntiKickMod : MonoBehaviour {
-    // Variables locales pour éviter les erreurs de compilation si elles manquent dans Setting
-    static string? IdentityToCopy = null;
-    static bool HideName = false;
-    
-    bool isRejoining = false;
-
     void OnEnable() {
         InputListener.OnBackslashPress += this.ToggleAntiKick;
         GameListener.OnGameStart += this.OnGameStart;
@@ -22,96 +15,65 @@ sealed class AntiKickMod : MonoBehaviour {
     }
 
     void OnGameEnd() {
-        // Ne pas intervenir si la déconnexion est volontaire
+        // On vérifie si on doit intervenir
         if (State.DisconnectedVoluntarily) return;
         if (!Setting.EnableAntiKick) return;
-        if (this.isRejoining) return;
 
-        // Étape 1 : Déconnexion forcée pour nettoyer le cache réseau
+        // Étape 1 : Forcer la déconnexion pour éviter de rester bloqué dans la session (le "zombie state")
         if (Helper.GameNetworkManager != null) {
-            Chat.Print("Anti-Kick: Kick détecté. Reconnexion automatique lancée...");
+            Chat.Print("Anti-Kick: Déconnexion forcée pour éviter le bug d'écran noir...");
             Helper.GameNetworkManager.Disconnect();
         }
 
-        this.isRejoining = true;
-        _ = this.StartCoroutine(this.InstantRejoin());
+        // Étape 2 : Lancer la séquence de reconnexion
+        _ = this.StartCoroutine(AntiKickMod.RejoinLobby());
     }
 
-    IEnumerator InstantRejoin() {
-        if (State.ConnectedLobby is not ConnectedLobby connectedLobby) {
-            this.isRejoining = false;
-            yield break;
+    static IEnumerator RejoinLobby() {
+        // On vérifie qu'on a bien les infos du lobby précédent en mémoire
+        if (State.ConnectedLobby is not ConnectedLobby connectedLobby) yield break;
+
+        WaitForEndOfFrame waitForEndOfFrame = new();
+
+        // Attente 1 : S'assurer que le réseau a bien coupé le lien avec le lobby actuel
+        while (Helper.GameNetworkManager?.currentLobby.HasValue is true) {
+            yield return waitForEndOfFrame;
         }
 
-        // Attente du retour au menu principal
+        // Attente 2 : Attendre que le jeu soit revenu sur la scène du Menu Principal
         while (Helper.FindObject<MenuManager>() is null) {
-            yield return new WaitForEndOfFrame();
+            yield return waitForEndOfFrame;
         }
 
-        // Reconnexion immédiate sans délai
+        // Pause de sécurité : On laisse une seconde à l'API Steam pour se rafraîchir
+        yield return new WaitForSeconds(1.5f);
+
+        // Étape 3 : Tentative de reconnexion au lobby stocké
+        Chat.Print($"Anti-Kick: Tentative de reconnexion au lobby de {connectedLobby.SteamId}...");
         Helper.GameNetworkManager?.JoinLobby(connectedLobby.Lobby, connectedLobby.SteamId);
-        this.isRejoining = false;
     }
 
     void OnGameStart() {
-        // On applique l'invisibilité et le camouflage dès le début de la partie
-        if (Setting.EnableAntiKick) {
-            this.ApplyIdentitySettings();
-        }
-    }
+        if (!Setting.EnableAntiKick) return;
+        if (!Setting.EnableInvisible) return;
 
-    void ApplyIdentitySettings() {
-        if (Helper.LocalPlayer == null) return;
-
-        // PRIORITÉ 1 : Usurpation d'identité (Copy Name)
-        if (IdentityToCopy != null) {
-            this.UpdateLocalName(IdentityToCopy);
-            return;
-        }
-
-        // PRIORITÉ 2 : Nom caché (Invisible)
-        if (HideName) {
-            this.UpdateLocalName("\u200B"); // Caractère invisible (Zero-width space)
-        }
-    }
-
-    void UpdateLocalName(string newName) {
-        if (Helper.LocalPlayer == null) return;
-        
-        // Mise à jour du pseudo sur l'objet joueur local
-        Helper.LocalPlayer.playerUsername = newName;
-        
-        // Notification dans le chat local pour confirmation
-        if (Helper.HUDManager != null) {
-            Chat.Print($"Identité furtive appliquée : {newName}");
-        }
+        Chat.Clear();
+        Helper.SendNotification(
+            title: "kikou",
+            body: "T'es invisible connard , fait /invis",
+            isWarning: true
+        );
     }
 
     void ToggleAntiKick() {
-        // Bascule de l'Anti-Kick et des paramètres de furtivité
+        if (Helper.LocalPlayer is not null) {
+            Chat.Print("Tu peux pas mettre l'antikick in game connard");
+            return;
+        }
+
         Setting.EnableAntiKick = !Setting.EnableAntiKick;
         Setting.EnableInvisible = Setting.EnableAntiKick;
-        HideName = Setting.EnableAntiKick;
-
-        string status = Setting.EnableAntiKick ? "<color=green>ACTIF</color>" : "<color=red>INACTIF</color>";
-        Chat.Print($"Anti-Kick & Stealth Mode : {status}");
-
-        // Si on désactive, on réinitialise l'identité à copier
-        if (!Setting.EnableAntiKick) {
-            IdentityToCopy = null;
-        }
-    }
-
-    // Commande pour voler l'identité d'un joueur cible
-    public void CopyPlayerIdentity(string targetName) {
-        var target = Helper.Players.FirstOrDefault(p => p.playerUsername.Contains(targetName, System.StringComparison.OrdinalIgnoreCase));
         
-        if (target != null) {
-            IdentityToCopy = target.playerUsername;
-            this.UpdateLocalName(target.playerUsername);
-            Chat.Print($"Identité copiée sur : {target.playerUsername}");
-        } else {
-            Chat.Print("Joueur introuvable pour la copie d'identité.");
-        }
+        Chat.Print(Setting.EnableAntiKick ? "Anti-Kick: ENABLED" : "Anti-Kick: DISABLED");
     }
 }
