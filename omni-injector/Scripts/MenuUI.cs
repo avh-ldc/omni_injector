@@ -345,6 +345,7 @@ namespace Hax
                 if (!isMe)
                 {
                     GUILayout.BeginHorizontal();
+
                     if (GUILayout.Button("KILL")) ExecuteCommand($"/kill {playerName}");
                     if (GUILayout.Button("BOMB")) ExecuteCommand($"/bomb {playerName}");
                     if (GUILayout.Button("VOID")) ExecuteCommand($"/void {playerName}");
@@ -499,6 +500,7 @@ namespace Hax
 
             if (GUILayout.Button("STUN ENEMIES (5s)")) ExecuteCommand("/stun 5");
             if (GUILayout.Button("CRASH")) ExecuteCommand("/crash");
+            if (GUILayout.Button("PANICDOOR")) ExecuteCommand("/panicdoor");
 
             GUILayout.Space(10);
             GUILayout.Label("--- CLIENT FX ---", labelStyle);
