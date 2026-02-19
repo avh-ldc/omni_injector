@@ -59,15 +59,15 @@ sealed class AntiKickMod : MonoBehaviour {
 
         Chat.Clear();
         Helper.SendNotification(
-            title: "kikou",
-            body: "T'es invisible connard , fait /invis",
+            title: "Omni injector",
+            body: "Tu es actuellement invisible",
             isWarning: true
         );
     }
 
     void ToggleAntiKick() {
         if (Helper.LocalPlayer is not null) {
-            Chat.Print("Tu peux pas mettre l'antikick in game connard");
+            Chat.Print("Tu peux pas mettre l'antikick in game :/");
             return;
         }
 
