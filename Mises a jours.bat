@@ -7,8 +7,11 @@ title OMNI INJECTOR - UPDATER
 mode con: cols=85 lines=30
 color 0B
 
+:: --- PARAMETRES DU DEPOT ---
+set "REPO_URL=https://github.com/avh-ldc/tartingrad.git"
+set "BRANCH=main"
+
 :: --- CORRECTIF CRITIQUE ---
-:: Force le script a s'executer dans le dossier ou il se trouve
 cd /d "%~dp0"
 :: --------------------------
 
@@ -44,16 +47,26 @@ if not exist ".git" (
 )
 
 :: ==========================================
-:: ETAPE 2 : CONNEXION
+:: ETAPE 2 : CONFIGURATION ET CONNEXION
 :: ==========================================
-echo  [*] Connexion au serveur GitHub...
-git fetch origin main >nul 2>&1
+echo  [*] Configuration de l'adresse distante...
 
-if %ERRORLEVEL% NEQ 0 (
+git remote set-url origin !REPO_URL! >nul 2>&1
+if !ERRORLEVEL! NEQ 0 (
+    git remote add origin !REPO_URL! >nul 2>&1
+)
+
+echo  [*] Connexion au serveur GitHub...
+git fetch origin !BRANCH! >nul 2>&1
+
+if !ERRORLEVEL! NEQ 0 (
     color 0C
     echo.
-    echo  [!] ECHEC DE CONNEXION.
-    echo      Impossible de contacter GitHub. Verifiez votre internet.
+    echo  [!] ECHEC DE CONNEXION AU DEPOT.
+    echo      Analyse des causes probables :
+    echo      1. La branche n'est pas "main" - testez avec "master".
+    echo      2. Le depot est prive et Git attend une authentification.
+    echo      3. Le lien du depot est incorrect ou n'existe plus.
     echo.
     echo  Appuyez sur une touche pour quitter...
     pause >nul
@@ -64,7 +77,7 @@ if %ERRORLEVEL% NEQ 0 (
 :: ETAPE 3 : COMPARAISON DES VERSIONS
 :: ==========================================
 for /f "delims=" %%i in ('git rev-parse HEAD') do set LOCAL=%%i
-for /f "delims=" %%i in ('git rev-parse origin/main') do set REMOTE=%%i
+for /f "delims=" %%i in ('git rev-parse origin/!BRANCH!') do set REMOTE=%%i
 
 echo  [*] Verification de l'integrite des fichiers...
 
@@ -82,7 +95,7 @@ if "!LOCAL!" == "!REMOTE!" (
     echo      Installation de la mise a jour en cours...
     echo  -------------------------------------------------------
     
-    git pull origin main
+    git pull origin !BRANCH!
     
     if !ERRORLEVEL! EQU 0 (
         echo.
@@ -90,7 +103,8 @@ if "!LOCAL!" == "!REMOTE!" (
     ) else (
         color 0C
         echo.
-        echo  [!] Erreur lors de l'installation de la mise a jour.
+        echo  [!] Erreur lors de l'installation.
+        echo      Conflit possible avec des fichiers locaux modifies.
     )
     echo  -------------------------------------------------------
 )
@@ -103,7 +117,7 @@ echo.
 echo  ============================================================
 echo  [OK] VOTRE CHEAT EST A JOUR.
 echo.
-echo       MERCI D'AVOIR CHOISI LA LDC.
+echo        MERCI D'AVOIR CHOISI LA LDC.
 echo  ============================================================
 echo.
 pause >nul
