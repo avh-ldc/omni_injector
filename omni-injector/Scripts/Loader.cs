@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
+using Omni.Menu.Core; // --- NOUVEAU : Lien vers notre nouvelle architecture de menu ---
 
 namespace Hax;
 

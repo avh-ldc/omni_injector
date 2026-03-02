@@ -39,6 +39,7 @@ namespace Hax
         private bool godMode, infiniteStamina, noclip, unlimitedJump;
         private bool stunClick, killClick, invis, hearAll, rapidUse;
         private bool esp, brightVision;
+        private bool betaMode; // NOUVEAU: Beta Mode
         private float speedHack = 1f;
         private float brightness = 1f;
         
@@ -54,6 +55,7 @@ namespace Hax
         private string poisonDmg = "15";
         private string poisonDur = "30";
         private string poisonDelay = "2";
+        private string maskAmount = "1"; // NOUVEAU: Quantité de masques
         private string spinInput = "10";
         private string enemyToSpawn = "Girl";
         private string spawnAmount = "1";
@@ -238,6 +240,7 @@ namespace Hax
             DrawToggle(ref rapidUse, "Rapid Fire (Action Rapide)", "/rapid");
             DrawToggle(ref invis, "Invisible", "/invis");
             DrawToggle(ref hearAll, "Tout Entendre (Talkie Global)", "/hear");
+            DrawToggle(ref betaMode, "Mode Beta", "/beta"); // NOUVEAU
             GUILayout.EndVertical();
 
             DrawSectionHeader("CLICS MAGIQUES");
@@ -283,17 +286,22 @@ namespace Hax
 
         void DrawRealTimePlayers()
         {
-            DrawSectionHeader("CONFIG POISON");
+            DrawSectionHeader("CONFIG PARAMÈTRES JOUEURS");
             GUILayout.BeginVertical(boxStyle);
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Dégâts:", labelStyle, GUILayout.Width(55));
+            GUILayout.Label("Poison Dégâts:", labelStyle, GUILayout.Width(95));
             poisonDmg = GUILayout.TextField(poisonDmg, textFieldStyle);
             GUILayout.Space(10);
-            GUILayout.Label("Durée (s):", labelStyle, GUILayout.Width(65));
+            GUILayout.Label("Durée(s):", labelStyle, GUILayout.Width(60));
             poisonDur = GUILayout.TextField(poisonDur, textFieldStyle);
             GUILayout.Space(10);
-            GUILayout.Label("Délai (s):", labelStyle, GUILayout.Width(60));
+            GUILayout.Label("Délai(s):", labelStyle, GUILayout.Width(55));
             poisonDelay = GUILayout.TextField(poisonDelay, textFieldStyle);
+            GUILayout.EndHorizontal();
+            GUILayout.Space(5);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Quantité Mask:", labelStyle, GUILayout.Width(95));
+            maskAmount = GUILayout.TextField(maskAmount, textFieldStyle); // NOUVEAU
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
 
@@ -330,9 +338,10 @@ namespace Hax
                     GUILayout.Space(10);
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button("KILL", buttonStyle)) ExecuteCommand($"/kill {playerName}");
+                    if (GUILayout.Button("SPAM-KILL", buttonStyle)) ExecuteCommand($"/spam-kill {playerName}"); // NOUVEAU
                     if (GUILayout.Button("BOMB", buttonStyle)) ExecuteCommand($"/bomb {playerName}");
                     if (GUILayout.Button("VOID", buttonStyle)) ExecuteCommand($"/void {playerName}");
-                    if (GUILayout.Button("MASK", buttonStyle)) ExecuteCommand($"/mask {playerName}");
+                    if (GUILayout.Button("MASK", buttonStyle)) ExecuteCommand($"/mask {maskAmount} {playerName}"); // MODIFIÉ
                     GUILayout.EndHorizontal();
                     GUILayout.Space(2);
                     GUILayout.BeginHorizontal();
@@ -377,7 +386,13 @@ namespace Hax
             if (GUILayout.Button("Garage", buttonStyle)) ExecuteCommand("/garage");
             if (GUILayout.Button("Détruire Mines", buttonStyle)) ExecuteCommand("/explode mine");
             if (GUILayout.Button("Détruire Tourelles", buttonStyle)) ExecuteCommand("/explode turret");
+            if (GUILayout.Button("Détruire Jetpacks", buttonStyle)) ExecuteCommand("/explode jetpack"); // NOUVEAU
+            GUILayout.EndHorizontal();
+            GUILayout.Space(5);
+            GUILayout.BeginHorizontal();
             if (GUILayout.Button("Tourelles Berserk", buttonStyle)) ExecuteCommand("/berserk");
+            if (GUILayout.Button("Destroy Basic", buttonStyle)) ExecuteCommand("/destroy"); // NOUVEAU
+            if (GUILayout.Button("Destroy ALL", buttonStyle)) ExecuteCommand("/destroy --all"); // NOUVEAU
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
 
@@ -414,6 +429,11 @@ namespace Hax
             if (GUILayout.Button("GODS ALL", buttonStyle)) ExecuteCommand("/gods");
             if (GUILayout.Button("EJECT ALL", buttonStyle)) ExecuteCommand("/eject");
             GUILayout.EndHorizontal();
+            GUILayout.Space(5);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Lumières ON/OFF", buttonStyle)) ExecuteCommand("/light"); // NOUVEAU
+            if (GUILayout.Button("Mode Disco", buttonStyle)) ExecuteCommand("/disco"); // NOUVEAU
+            GUILayout.EndHorizontal();
             GUILayout.EndVertical();
             
             DrawSectionHeader("SPAWNER (REQUIS HOST)");
@@ -429,13 +449,15 @@ namespace Hax
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
 
-            DrawSectionHeader("GÉNÉRATION D'OBJETS");
+            DrawSectionHeader("GÉNÉRATION & CONTRÔLE D'OBJETS");
             GUILayout.BeginVertical(boxStyle);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Teleporter", buttonStyle)) ExecuteCommand("/build teleporter");
             if (GUILayout.Button("Inverse TP", buttonStyle)) ExecuteCommand("/build inverse");
             if (GUILayout.Button("Terminal", buttonStyle)) ExecuteCommand("/build terminal");
             GUILayout.EndHorizontal();
+            GUILayout.Space(5);
+            if (GUILayout.Button("GRAB TOUS LES OBJETS (MAP)", buttonStyle)) ExecuteCommand("/grab"); // NOUVEAU
             GUILayout.EndVertical();
 
             DrawSectionHeader("FINANCES DU GROUPE");
@@ -488,13 +510,16 @@ namespace Hax
             if (GUILayout.Button("NETTOYER LE CHAT", buttonStyle)) ExecuteCommand("/clear");
             GUILayout.EndVertical();
 
-            DrawSectionHeader("ACTIONS TROLL (ANNOY)");
+            DrawSectionHeader("ACTIONS TROLL GLOBALES (TOUS)"); // Modifié pour inclure Spam-Kill
             GUILayout.BeginVertical(boxStyle);
+            if (GUILayout.Button("SPAM-KILL TOUS LES JOUEURS", buttonStyle, GUILayout.Height(30))) ExecuteCommand("/spam-kill --all"); // NOUVEAU
+            GUILayout.Space(10);
+            
             GUILayout.BeginHorizontal();
             GUILayout.Label("Durée de bruit (s) :", labelStyle, GUILayout.Width(120));
             noiseDuration = GUILayout.TextField(noiseDuration, textFieldStyle);
             GUILayout.Space(10);
-            if (GUILayout.Button("SPAMMER LE BRUIT (TOUS)", buttonStyle)) 
+            if (GUILayout.Button("SPAMMER LE BRUIT", buttonStyle)) 
             {
                 if (Helper.Players != null) 
                     foreach(var p in Helper.Players) ExecuteCommand($"/noise {p.playerUsername} {noiseDuration}");
@@ -685,7 +710,7 @@ namespace Hax
 
         void ResetConfig()
         {
-            godMode = infiniteStamina = noclip = unlimitedJump = esp = brightVision = false;
+            godMode = infiniteStamina = noclip = unlimitedJump = esp = brightVision = betaMode = false;
             stunClick = killClick = invis = hearAll = rapidUse = false;
             fakeLag = invertControls = headSpin = cameraShake = rainbowScreen = uiGlitch = timeJitter = fakeFreeze = notifSpam = drunkCamera = extremeHeadSpin = false;
             
