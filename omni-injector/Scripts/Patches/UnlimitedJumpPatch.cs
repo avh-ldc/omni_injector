@@ -4,8 +4,8 @@ using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
 
-[HarmonyPatch(typeof(PlayerControllerB), "Jump_performed")]
-class UnlimitedJumpPatch {
+[HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.Jump_performed))]
+sealed class UnlimitedJumpPatch {
     static bool Prefix(PlayerControllerB __instance) {
         if (!Setting.EnableUnlimitedJump) return true;
         if (!__instance.IsSelf()) return true;

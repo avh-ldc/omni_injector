@@ -3,8 +3,8 @@
 using HarmonyLib;
 
 [HarmonyPatch]
-class PossessionPatch {
-    [HarmonyPatch(typeof(HUDManager), "CanPlayerScan")]
+sealed class PossessionPatch {
+    [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.CanPlayerScan))]
     static bool Prefix(ref bool __result) {
         if (PossessionMod.Instance is null or { IsPossessed: false }) return true;
 
@@ -12,7 +12,7 @@ class PossessionPatch {
         return false;
     }
 
-    [HarmonyPatch(typeof(HUDManager), "Update")]
+    [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.Update))]
     static void Prefix(HUDManager __instance, ref float ___holdButtonToEndGameEarlyHoldTime) {
         if (PossessionMod.Instance is null or { IsPossessed: false }) return;
 

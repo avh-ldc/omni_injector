@@ -1,8 +1,8 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 
-[HarmonyPatch(typeof(PlayerControllerB), "KillPlayerClientRpc")]
-class DeathNotificationPatch {
+[HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.KillPlayerClientRpc))]
+sealed class DeathNotificationPatch {
     static void Postfix(int playerId, int causeOfDeath) {
         if (Helper.GetPlayer(playerId) is not PlayerControllerB player) return;
         if (player.IsSelf()) return;

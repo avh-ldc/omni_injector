@@ -5,8 +5,8 @@ using System.Reflection.Emit;
 using HarmonyLib;
 
 [HarmonyPatch(typeof(HUDManager))]
-class InfiniteScanRangePatch {
-    [HarmonyPatch("AssignNewNodes")]
+sealed class InfiniteScanRangePatch {
+    [HarmonyPatch(nameof(HUDManager.AssignNewNodes))]
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
         bool foundMaxDistance = false;
 
@@ -24,7 +24,7 @@ class InfiniteScanRangePatch {
         }
     }
 
-    [HarmonyPatch("MeetsScanNodeRequirements")]
+    [HarmonyPatch(nameof(HUDManager.MeetsScanNodeRequirements))]
     static bool Prefix(ScanNodeProperties? node, ref bool __result) {
         if (node is null) return true;
 

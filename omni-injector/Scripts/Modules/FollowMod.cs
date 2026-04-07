@@ -58,7 +58,7 @@ sealed class FollowMod : MonoBehaviour {
         this.AnimationBroadcastTimer -= Time.deltaTime;
 
         int[] animationStates = [
-            ..targetPlayer.playerBodyAnimator
+            .. targetPlayer.playerBodyAnimator
                           .layerCount
                           .Range()
                           .Select(i => targetPlayer.playerBodyAnimator.GetCurrentAnimatorStateInfo(i).fullPathHash)
@@ -104,7 +104,7 @@ sealed class FollowMod : MonoBehaviour {
         }
 
         localPlayer.transform.position = state.position;
-        localPlayer.UpdatePlayerPositionServerRpc(
+        localPlayer.UpdatePlayerPositionRpc(
             localPlayer.thisPlayerBody.localPosition,
             localPlayer.isInElevator,
             localPlayer.isInHangarShipRoom,

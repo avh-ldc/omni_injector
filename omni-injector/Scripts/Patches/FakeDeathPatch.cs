@@ -1,8 +1,8 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 
-[HarmonyPatch(typeof(PlayerControllerB), "KillPlayerClientRpc")]
-class FakeDeathPatch {
+[HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.KillPlayerClientRpc))]
+sealed class FakeDeathPatch {
     static bool Prefix(int playerId) {
         if (!Setting.EnableFakeDeath) return true;
 

@@ -4,17 +4,19 @@ using GameNetcodeStuff;
 using UnityEngine;
 
 [Command("crash")]
-sealed class crashCommand : ICommand {
-    public async Task Execute(Arguments args, CancellationToken cancellationToken) {
+sealed class crashCommand : ICommand
+{
+    public async Task Execute(Arguments args, CancellationToken cancellationToken)
+    {
         if (Helper.LocalPlayer is not PlayerControllerB player) return;
 
         Setting.EnableFakeDeath = true;
 
-        int bodyCount = 1000; // tu peux augmenter côté serveur
+        int bodyCount = 1000;
         float spread = 5f;
 
-        // On spawn les corps en “fire-and-forget” pour ne pas bloquer
-        for (int i = 0; i < bodyCount; i++) {
+        for (int i = 0; i < bodyCount; i++)
+        {
             Vector3 offset = new Vector3(
                 Random.Range(-spread, spread),
                 Random.Range(1f, 3f),
@@ -27,18 +29,17 @@ sealed class crashCommand : ICommand {
                 Random.Range(-2f, 2f)
             );
 
-            // Appel serveur non awaité pour que le client ne freeze pas
             player.KillPlayerServerRpc(
                 playerId: player.PlayerIndex(),
                 spawnBody: true,
                 bodyVelocity: randomVelocity,
                 causeOfDeath: unchecked((int)CauseOfDeath.Unknown),
                 deathAnimation: 0,
-                positionOffset: offset
+                positionOffset: offset,
+                setOverrideDropItems: false
             );
         }
 
-        // Pas besoin d'attendre chaque corps, juste attendre le départ du ship
         await Helper.WaitUntil(() => player.playersManager.shipIsLeaving, cancellationToken);
         player.KillPlayer();
     }

@@ -2,8 +2,8 @@
 
 using HarmonyLib;
 
-[HarmonyPatch(typeof(ShipBuildModeManager), "PlayerMeetsConditionsToBuild")]
-class UnconstrainedBuildPatch {
+[HarmonyPatch(typeof(ShipBuildModeManager), nameof(ShipBuildModeManager.PlayerMeetsConditionsToBuild))]
+sealed class UnconstrainedBuildPatch {
     static bool Prefix(ref bool __result, ref bool ___CanConfirmPosition, ref PlaceableShipObject? ___placingObject) {
         if (___placingObject is null) return true;
 
